@@ -1,9 +1,9 @@
-import {TSortDirection} from '@builtbymom/web3/types';
 import {useCallback} from 'react';
+import {cl} from '@builtbymom/web3/utils';
 import {IconChevronPlain} from '@yearn-finance/web-lib/icons/IconChevronPlain';
 
 import type {ReactElement} from 'react';
-import {cl} from '@builtbymom/web3/utils';
+import type {TSortDirection} from '@builtbymom/web3/types';
 
 export type TListHead = {
 	items: {
