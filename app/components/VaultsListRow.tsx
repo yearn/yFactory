@@ -3,13 +3,10 @@ import Link from 'next/link';
 import {useBalance} from 'app/hooks/useBalance';
 import {getVaultName} from 'app/utils';
 import useWallet from '@builtbymom/web3/contexts/useWallet';
+import {formatAmount, isZero, toAddress, toNormalizedBN} from '@builtbymom/web3/utils';
 import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
 import {Renderable} from '@yearn-finance/web-lib/components/Renderable';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {ETH_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS, WFTM_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
-import {toNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import {formatAmount} from '@yearn-finance/web-lib/utils/format.number';
-import {isZero} from '@yearn-finance/web-lib/utils/isZero';
 
 import {RenderAmount} from './common/RenderAmount';
 
@@ -49,7 +46,7 @@ export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): 
 						<span className={'tooltipLight bottom-full mb-1'}>
 							<div
 								className={
-									'font-number text-xxs w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-neutral-900'
+									'font-number w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-xxs text-neutral-900'
 								}>
 								<div className={'flex flex-col items-start justify-start text-left'}>
 									<div
@@ -135,7 +132,7 @@ export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): 
 					<span className={'tooltipLight bottom-full mb-1'}>
 						<div
 							className={
-								'font-number text-xxs w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-neutral-900'
+								'font-number w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-xxs text-neutral-900'
 							}>
 							<div className={'flex flex-col items-start justify-start text-left'}>
 								<div
@@ -193,7 +190,7 @@ export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): 
 					<span className={'tooltipLight bottom-full mb-1'}>
 						<div
 							className={
-								'font-number text-xxs w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-neutral-900'
+								'font-number w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-xxs text-neutral-900'
 							}>
 							<div className={'flex flex-col items-start justify-start text-left'}>
 								<div
@@ -279,7 +276,7 @@ function VaultHistoricalAPR({currentVault}: {currentVault: TYDaemonVault}): Reac
 					<span className={'tooltipLight bottom-full mb-1'}>
 						<div
 							className={
-								'font-number text-xxs w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-neutral-900'
+								'font-number w-fit border border-neutral-300 bg-neutral-100 p-1 px-2 text-center text-xxs text-neutral-900'
 							}>
 							<div className={'flex flex-col items-start justify-start text-left'}>
 								<div

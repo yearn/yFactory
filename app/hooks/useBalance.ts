@@ -1,8 +1,7 @@
 import useWallet from '@builtbymom/web3/contexts/useWallet';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
+import {toAddress} from '@builtbymom/web3/utils';
 
-import type {TNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import type {TAddress, TDict} from '@builtbymom/web3/types';
+import type {TAddress, TDict, TNormalizedBN} from '@builtbymom/web3/types';
 
 export function useBalance({
 	address,

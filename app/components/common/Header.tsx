@@ -4,10 +4,9 @@ import {useRouter} from 'next/router';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
 import {truncateHex} from '@builtbymom/web3/utils/tools.address';
 import {useAccountModal, useChainModal} from '@rainbow-me/rainbowkit';
+import {LogoPopover} from '@yearn-finance/web-lib/components/LogoPopover';
 import {ModalMobileMenu} from '@yearn-finance/web-lib/components/ModalMobileMenu';
 import {IconWallet} from '@yearn-finance/web-lib/icons/IconWallet';
-
-import {LogoPopover} from './HeaderPopover';
 
 import type {ReactElement} from 'react';
 
@@ -74,7 +73,7 @@ function WalletSelector(): ReactElement {
 						<IconWallet className={'yearn--header-nav-item mt-0.5 block size-4 md:hidden'} />
 						<span
 							className={
-								'text-neutral-0 relative hidden h-8 cursor-pointer items-center justify-center rounded border border-transparent bg-neutral-900 px-2 text-xs font-normal transition-all hover:bg-neutral-800 md:flex'
+								'relative hidden h-8 cursor-pointer items-center justify-center rounded border border-transparent bg-neutral-900 px-2 text-xs font-normal text-neutral-0 transition-all hover:bg-neutral-800 md:flex'
 							}>
 							{'Connect wallet'}
 						</span>
@@ -94,7 +93,7 @@ function AppHeader(): ReactElement {
 	return (
 		<div
 			id={'head'}
-			className={'bg-neutral-0 inset-x-0 top-0 z-50 w-full'}>
+			className={'inset-x-0 top-0 z-50 w-full bg-neutral-0'}>
 			<div className={'w-full'}>
 				<header className={'yearn--header mx-auto max-w-6xl !px-0'}>
 					<Navbar

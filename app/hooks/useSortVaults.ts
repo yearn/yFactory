@@ -1,9 +1,8 @@
 import {useCallback, useMemo} from 'react';
 import {getVaultName} from 'app/utils';
 import useWallet from '@builtbymom/web3/contexts/useWallet';
-import {numberSort, stringSort} from '@builtbymom/web3/utils';
+import {numberSort, stringSort, toAddress} from '@builtbymom/web3/utils';
 import {deserialize, serialize} from '@wagmi/core';
-import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {ETH_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS, WFTM_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 
 import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';

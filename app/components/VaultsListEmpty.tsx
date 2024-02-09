@@ -1,5 +1,5 @@
+import {isZero} from '@builtbymom/web3/utils';
 import {Button} from '@yearn-finance/web-lib/components/Button';
-import {isZero} from '@yearn-finance/web-lib/utils/isZero';
 
 import type {ReactElement} from 'react';
 import type {TYDaemonVaults} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';

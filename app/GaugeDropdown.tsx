@@ -1,8 +1,8 @@
 import {cloneElement, Fragment, useMemo, useState} from 'react';
+import {formatPercent} from '@builtbymom/web3/utils';
 import {Combobox, Transition} from '@headlessui/react';
 import {Renderable} from '@yearn-finance/web-lib/components/Renderable';
 import {IconChevron} from '@yearn-finance/web-lib/icons/IconChevron';
-import {formatPercent} from '@yearn-finance/web-lib/utils/format.number';
 
 import type {ReactElement} from 'react';
 import type {TDropdownGaugeItemProps, TDropdownGaugeOption, TDropdownGaugeProps} from '@yearn-finance/web-lib/types';
@@ -13,7 +13,7 @@ function DropdownItem({option}: TDropdownGaugeItemProps): ReactElement {
 			{({active}): ReactElement => (
 				<div
 					data-active={active}
-					className={'yearn--dropdown-menu-item hover:bg-neutral-0/40 w-full'}>
+					className={'yearn--dropdown-menu-item w-full hover:bg-neutral-0/40'}>
 					<div className={'size-6 flex-none rounded-full'}>
 						{option?.icon ? cloneElement(option.icon) : null}
 					</div>
@@ -95,7 +95,7 @@ export function Dropdown({options, selected, onSelect, placeholder = ''}: TDropd
 					<Combobox.Button
 						onClick={(): void => set_isOpen(!isOpen)}
 						className={
-							'bg-neutral-0 flex h-10 w-full items-center justify-between p-2 text-base text-neutral-900 md:px-3'
+							'flex h-10 w-full items-center justify-between bg-neutral-0 p-2 text-base text-neutral-900 md:px-3'
 						}>
 						<div className={'relative flex flex-row items-center'}>
 							<div
@@ -109,11 +109,11 @@ export function Dropdown({options, selected, onSelect, placeholder = ''}: TDropd
 							</div>
 							<p
 								className={
-									'scrollbar-none max-w-[90%] overflow-x-hidden text-ellipsis whitespace-nowrap pl-2 font-normal text-neutral-900 md:max-w-full'
+									'max-w-[90%] overflow-x-hidden text-ellipsis whitespace-nowrap pl-2 font-normal text-neutral-900 scrollbar-none md:max-w-full'
 								}>
 								<Combobox.Input
 									className={
-										'scrollbar-none w-full cursor-default overflow-x-scroll border-none bg-transparent p-0 outline-none'
+										'w-full cursor-default overflow-x-scroll border-none bg-transparent p-0 outline-none scrollbar-none'
 									}
 									displayValue={(option: TDropdownGaugeOption): string => option.label}
 									placeholder={placeholder}

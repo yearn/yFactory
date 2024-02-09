@@ -1,4 +1,4 @@
-import {cl} from '@yearn-finance/web-lib/utils/cl';
+import {cl} from '@builtbymom/web3/utils';
 
 import type {ChangeEvent, ReactElement} from 'react';
 
@@ -23,7 +23,7 @@ export function SearchBar(props: TSearchBar): ReactElement {
 						id={'search'}
 						suppressHydrationWarning
 						className={
-							'scrollbar-none h-10 w-full overflow-x-scroll border-none bg-transparent px-0 py-2 text-base outline-none placeholder:text-neutral-400'
+							'h-10 w-full overflow-x-scroll border-none bg-transparent px-0 py-2 text-base outline-none scrollbar-none placeholder:text-neutral-400'
 						}
 						type={'text'}
 						placeholder={props.searchPlaceholder}
