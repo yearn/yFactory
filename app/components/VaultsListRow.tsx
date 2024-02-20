@@ -382,7 +382,8 @@ export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): Re
 	return (
 		<Link
 			key={`${currentVault.address}`}
-			href={`/vaults/${currentVault.chainID}/${toAddress(currentVault.address)}`}>
+			target={'_blank'}
+			href={`https://yearn.fi/vaults/${currentVault.chainID}/${toAddress(currentVault.address)}`}>
 			<div className={'yearn--table-wrapper cursor-pointer transition-colors hover:bg-neutral-300'}>
 				<div className={'flex max-w-[32px] flex-row items-center'}>
 					<ImageWithFallback
