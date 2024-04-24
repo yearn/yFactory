@@ -38,7 +38,7 @@ export function useChainOptions(chains: number[] | null): TMultiSelectOptionProp
 				isSelected: chains?.includes(chain.id) || false,
 				icon: (
 					<ImageWithFallback
-						src={`${process.env.BASE_YEARN_CHAIN_URI}/${chain.id}/logo-128.png`}
+						src={`${process.env.BASE_YEARN_CHAIN_URI}/${chain.id}/logo-32.png`}
 						alt={chain.name}
 						width={32}
 						height={32}
