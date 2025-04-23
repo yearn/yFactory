@@ -1,6 +1,6 @@
 'use client';
 
-import {cloneElement, useState} from 'react';
+import {cloneElement, useEffect, useState} from 'react';
 import Link from 'next/link';
 import {motion} from 'framer-motion';
 import {cl} from '@builtbymom/web3/utils';
@@ -41,6 +41,14 @@ export function LogoPopover(): ReactElement {
 
 	const [isShowingMore, set_isShowingMore] = useState(false);
 
+	useEffect(() => {
+		if (!isShowing) {
+			setTimeout(() => {
+				set_isShowingMore(false);
+			}, 500);
+		}
+	}, [isShowing]);
+
 	return (
 		<>
 			<Popover
@@ -77,7 +85,7 @@ export function LogoPopover(): ReactElement {
 						className={'relative z-[9999999]'}>
 						<Popover.Panel
 							className={
-								'absolute left-1/2 z-20 w-[300px] -translate-x-1/2 bg-transparent px-4 pt-6 sm:px-0'
+								'absolute left-1/2 z-20 w-[345px] -translate-x-1/2 scale-[115%] bg-transparent px-4 pt-10 sm:px-0'
 							}>
 							<div className={cl('overflow-hidden shadow-xl', 'pt-0')}>
 								<div
@@ -130,7 +138,7 @@ export function LogoPopover(): ReactElement {
 														<div
 															onClick={(): void => set_isShowing(false)}
 															className={cl(
-																'flex cursor-pointer flex-col items-center justify-center transition-colors p-2 rounded-sm',
+																'flex cursor-pointer flex-col items-center justify-center transition-colors p-4 rounded-sm',
 																'bg-[#EBEBEB] dark:border-[#151C40] dark:border hover:bg-[#c3c3c380] dark:bg-neutral-100 hover:dark:bg-neutral-0'
 															)}>
 															<div>
@@ -142,7 +150,7 @@ export function LogoPopover(): ReactElement {
 															<div className={'text-center'}>
 																<b
 																	className={cl(
-																		'text-xxs',
+																		'text-xs',
 																		'text-black dark:text-white'
 																	)}>
 																	{name}
@@ -156,10 +164,10 @@ export function LogoPopover(): ReactElement {
 											<button
 												onClick={(): void => set_isShowingMore(true)}
 												className={cl(
-													'flex cursor-pointer text-xxs flex-col items-center justify-center transition-colors p-4 rounded-sm',
+													'flex cursor-pointer text-xs flex-col items-center justify-center transition-colors p-4 rounded-sm',
 													'bg-[#EBEBEB] dark:border-[#151C40] dark:border hover:bg-[#c3c3c380] dark:bg-neutral-100 hover:dark:bg-neutral-0'
 												)}>
-												{'More...'}
+												<b>{'More...'}</b>
 											</button>
 										)}
 									</div>
