@@ -134,7 +134,7 @@ function Factory(): ReactElement {
 		const name = decodeAsString(results[0]);
 		const symbol = decodeAsString(results[1]);
 		set_gaugeDisplayData({
-			name: name.replace('Curve.fi', '').replace('Gauge Deposit', '') || selectedOption.value.name,
+			name: name.replace('Curve.finance', '').replace('Gauge Deposit', '') || selectedOption.value.name,
 			symbol: symbol.replace('-gauge', '').replace('-f', '') || selectedOption.value.name,
 			poolAddress: selectedOption.value.poolAddress,
 			gaugeAddress: selectedOption.value.gaugeAddress
