@@ -35,7 +35,7 @@ export const CurveContextApp = ({children}: {children: React.ReactElement}): Rea
 	 **	Fetch all the CurveGauges to be able to create some new if required
 	 ***************************************************************************/
 	const {data: gaugesWrapper, isLoading: isLoadingGauges} = useFetch<TCurveAllGauges>({
-		endpoint: 'https://api.curve.fi/v1/getAllGauges',
+		endpoint: 'https://api.curve.finance/v1/getAllGauges',
 		schema: curveAllGaugesSchema
 	});
 
