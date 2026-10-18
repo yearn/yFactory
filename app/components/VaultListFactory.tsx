@@ -121,7 +121,7 @@ export function VaultListFactory(): ReactElement {
 				items={[
 					{label: <IconChain />, value: 'chain', sortable: false, className: 'col-span-1'},
 					{label: 'Token', value: 'name', sortable: true},
-					{label: 'Est. APR', value: 'estAPR', sortable: true, className: 'col-span-2'},
+					{label: 'Est. yield', value: 'estAPR', sortable: true, className: 'col-span-2'},
 					{label: 'Hist. APR', value: 'apr', sortable: true, className: 'col-span-2'},
 					{label: 'Available', value: 'available', sortable: true, className: 'col-span-2'},
 					{label: 'Holdings', value: 'deposited', sortable: true, className: 'col-span-2'},
