@@ -393,7 +393,7 @@ export function VaultStakedAmount({currentVault}: {currentVault: TYDaemonVault})
 }
 
 export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): ReactElement {
-	const {totalAssets, error: snapshotError, isLoading: snapshotLoading} = useKongVaultTotalAssets(
+	const {totalAssets, error: isSnapshotError, isLoading: isSnapshotLoading} = useKongVaultTotalAssets(
 		currentVault.chainID,
 		currentVault.address
 	);
@@ -492,9 +492,9 @@ export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): Re
 						<p className={'yearn--table-data-section-item-label !font-aeonik'}>{'TVL'}</p>
 						<div className={'flex flex-col text-right'}>
 							<p className={'yearn--table-data-section-item-value'}>
-								{snapshotLoading ? (
+								{isSnapshotLoading ? (
 									<span>{'Loading…'}</span>
-								) : !snapshotError &&
+								) : !isSnapshotError &&
 								totalAssets !== undefined &&
 								Number.isFinite(currentVault.token.decimals) ? (
 									<RenderAmount

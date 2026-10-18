@@ -64,7 +64,7 @@ type TKongVault = {
 	isHighlighted?: boolean | null;
 	strategiesCount?: number | null;
 	riskLevel?: number | null;
-	migration?: boolean | Record<string, unknown> | null;
+	migration?: boolean | {[key: string]: unknown} | null;
 	staking?: {address?: string | null; available?: boolean | null; source?: string | null} | null;
 };
 
@@ -102,7 +102,7 @@ type TYearnContext = {
 	mutateVaultList: () => Promise<unknown>;
 };
 
-const defaultContext: TYearnContext = {
+const DEFAULT_CONTEXT: TYearnContext = {
 	vaults: {},
 	vaultsMigrations: {},
 	vaultsRetired: {},
@@ -149,7 +149,7 @@ async function fetchVaultList(): Promise<TKongVault[]> {
 
 const MAX_CONCURRENT_SNAPSHOTS = 8;
 let activeSnapshots = 0;
-const snapshotWaiters: Array<() => void> = [];
+const snapshotWaiters: (() => void)[] = [];
 
 async function fetchSnapshot(chainId: number | string, address: string): Promise<TKongSnapshot> {
 	if (activeSnapshots >= MAX_CONCURRENT_SNAPSHOTS) {
@@ -198,7 +198,7 @@ export function useKongVaultTotalAssets(
 	address: string
 ): {totalAssets?: bigint; error: boolean; isLoading: boolean} {
 	const key = `${KONG_BASE_URL}/snapshot/${chainId}/${address.toLowerCase()}`;
-	const {data, error, isLoading} = useSWR<TKongSnapshot>(key, () => fetchSnapshot(chainId, address));
+	const {data, error, isLoading} = useSWR<TKongSnapshot>(key, async () => fetchSnapshot(chainId, address));
 	return {totalAssets: error ? undefined : parseRawAmount(data?.totalAssets), error: Boolean(error), isLoading};
 }
 
@@ -225,7 +225,7 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 	const historical = performance?.historical;
 	const stakingRewards = snapshot?.staking?.rewards;
 	const activeRewardAPRs = (stakingRewards || [])
-		.filter(reward => reward.isFinished !== true)
+		.filter(reward => !reward.isFinished)
 		.map(reward => finiteNumber(reward.apr));
 	const validRewardAPRs = activeRewardAPRs.filter((apr): apr is number => apr !== undefined);
 	const stakingRewardsAPR =
@@ -235,8 +235,8 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 	const migration = meta?.migration;
 	const migrationAddress = nonZeroAddress(migration?.target);
 	const migrationContract = nonZeroAddress(migration?.contract);
-	const migrationAvailable =
-		migration?.available === true &&
+	const isMigrationAvailable =
+		Boolean(migration?.available) &&
 		migrationAddress !== undefined &&
 		migrationContract !== undefined;
 	const totalAssetsValue = parseRawAmount(snapshot?.totalAssets);
@@ -316,7 +316,7 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 			available: snapshot?.staking?.available ?? vault.staking?.available ?? false
 		},
 		migration: {
-			available: migrationAvailable,
+			available: isMigrationAvailable,
 			address: migrationAddress as `0x${string}`,
 			contract: migrationContract as `0x${string}`
 		},
@@ -324,13 +324,13 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 	} as unknown as TYDaemonVault;
 }
 
-const YearnContext = createContext<TYearnContext>(defaultContext);
+const YearnContext = createContext<TYearnContext>(DEFAULT_CONTEXT);
 
 export function YearnContextApp({children}: {children: ReactElement}): ReactElement {
 	const {data: rows, error: listError, mutate, isLoading} = useSWR<TKongVault[]>(KONG_LIST_URL, fetchVaultList);
 	const requiredSnapshotKeys = useMemo((): string[] => {
 		return (rows || [])
-			.filter(vault => hasMigration(vault) || vault.staking?.available === true)
+			.filter(vault => hasMigration(vault) || Boolean(vault.staking?.available))
 			.map(snapshotKey)
 			.sort();
 	}, [rows]);
@@ -340,13 +340,13 @@ export function YearnContextApp({children}: {children: ReactElement}): ReactElem
 	);
 	const {
 		data: snapshotResults,
-		error: snapshotError,
-		isLoading: snapshotsLoading,
+		error: isSnapshotError,
+		isLoading: isSnapshotsLoading,
 		mutate: mutateSnapshots
 	} = useSWR<TKongSnapshotResult[]>(serializedSnapshotKeys, fetchSnapshots);
 	const snapshots = useMemo((): Map<string, TKongSnapshot> => {
 		const result = new Map<string, TKongSnapshot>();
-		if (snapshotError) {
+		if (isSnapshotError) {
 			return result;
 		}
 		for (const entry of snapshotResults || []) {
@@ -355,7 +355,7 @@ export function YearnContextApp({children}: {children: ReactElement}): ReactElem
 			}
 		}
 		return result;
-	}, [snapshotResults, snapshotError]);
+	}, [snapshotResults, isSnapshotError]);
 	const vaultCollections = useMemo(() => {
 		const active: TDict<TYDaemonVault> = {};
 		const migrations: TDict<TYDaemonVault> = {};
@@ -384,11 +384,11 @@ export function YearnContextApp({children}: {children: ReactElement}): ReactElem
 			vaults: vaultCollections.active,
 			vaultsMigrations: vaultCollections.migrations,
 			vaultsRetired: vaultCollections.retired,
-			isLoadingVaultList: isLoading || snapshotsLoading,
-			isVaultListError: Boolean(listError || snapshotError || snapshotFailures),
+			isLoadingVaultList: isLoading || isSnapshotsLoading,
+			isVaultListError: Boolean(listError || isSnapshotError || snapshotFailures),
 			mutateVaultList: async (): Promise<unknown> => Promise.all([mutate(), mutateSnapshots()])
 		}),
-		[vaultCollections, isLoading, snapshotsLoading, listError, snapshotError, snapshotFailures, mutate, mutateSnapshots]
+		[vaultCollections, isLoading, isSnapshotsLoading, listError, isSnapshotError, snapshotFailures, mutate, mutateSnapshots]
 	);
 
 	return (

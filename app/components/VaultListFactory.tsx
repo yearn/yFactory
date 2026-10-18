@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
-import {useVaultFilter} from 'app/hooks/useFilteredVaults';
 import {useYearn} from 'app/contexts/useYearn';
+import {useVaultFilter} from 'app/hooks/useFilteredVaults';
 import {useSortVaults} from 'app/hooks/useSortVaults';
 import {useQueryArguments} from 'app/hooks/useVaultsQueryArgs';
 import {ALL_VAULTS_FACTORY_CATEGORIES_KEYS} from 'app/utils';
