@@ -1,7 +1,7 @@
 import {useCallback} from 'react';
 import useWallet from '@builtbymom/web3/contexts/useWallet';
 import {useDeepCompareMemo} from '@react-hookz/web';
-import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
+import {useYearn} from 'app/contexts/useYearn';
 import {isAutomatedVault, type TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
 
 import type {TAddress, TDict} from '@builtbymom/web3/types';

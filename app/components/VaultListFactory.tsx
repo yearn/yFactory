@@ -1,10 +1,10 @@
 import {useMemo} from 'react';
 import {useVaultFilter} from 'app/hooks/useFilteredVaults';
+import {useYearn} from 'app/contexts/useYearn';
 import {useSortVaults} from 'app/hooks/useSortVaults';
 import {useQueryArguments} from 'app/hooks/useVaultsQueryArgs';
 import {ALL_VAULTS_FACTORY_CATEGORIES_KEYS} from 'app/utils';
 import {isZero} from '@builtbymom/web3/utils';
-import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
 import {IconChain} from '@yearn-finance/web-lib/icons/IconChain';
 
 import {ListHead} from './ListHead';

@@ -1,5 +1,6 @@
 import {useMemo} from 'react';
 import Link from 'next/link';
+import {useKongVaultTotalAssets} from 'app/contexts/useYearn';
 import {useBalance} from 'app/hooks/useBalance';
 import {getVaultName} from 'app/utils';
 import useWallet from '@builtbymom/web3/contexts/useWallet';
@@ -15,6 +16,14 @@ import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVa
 
 export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): ReactElement {
 	const isEthMainnet = currentVault.chainID === 1;
+	const displayedAPR =
+		currentVault.apr.forwardAPR.type === '' ? currentVault.apr.netAPR : currentVault.apr.forwardAPR.netAPR;
+	if (
+		!Number.isFinite(displayedAPR) ||
+		(currentVault.staking.available && !Number.isFinite(currentVault.apr.extra.stakingRewardsAPR))
+	) {
+		return <p className={'yearn--table-data-section-item-value'}>{'N/A'}</p>;
+	}
 	if (currentVault.apr.forwardAPR.type === '') {
 		const hasZeroAPR =
 			isZero(currentVault.apr?.netAPR) || Number(Number(currentVault.apr?.netAPR || 0).toFixed(2)) === 0;
@@ -251,6 +260,10 @@ function VaultHistoricalAPR({currentVault}: {currentVault: TYDaemonVault}): Reac
 		isZero(currentVault.apr?.netAPR) || Number(Number(currentVault.apr?.netAPR || 0).toFixed(2)) === 0;
 	const monthlyAPR = currentVault.apr.points.monthAgo;
 	const weeklyAPR = currentVault.apr.points.weekAgo;
+	const displayedAPR = Number.isFinite(monthlyAPR) && !isZero(monthlyAPR) ? monthlyAPR : weeklyAPR;
+	if (!Number.isFinite(displayedAPR)) {
+		return <p className={'yearn--table-data-section-item-value'}>{'N/A'}</p>;
+	}
 
 	if (currentVault.apr?.extra.stakingRewardsAPR > 0) {
 		return (
@@ -266,7 +279,7 @@ function VaultHistoricalAPR({currentVault}: {currentVault: TYDaemonVault}): Reac
 								}>
 								<RenderAmount
 									shouldHideTooltip={hasZeroAPR}
-									value={isZero(monthlyAPR) ? weeklyAPR : monthlyAPR}
+									value={displayedAPR}
 									symbol={'percent'}
 									decimals={6}
 								/>
@@ -286,7 +299,7 @@ function VaultHistoricalAPR({currentVault}: {currentVault: TYDaemonVault}): Reac
 									<p>{'• Base APR '}</p>
 									<RenderAmount
 										shouldHideTooltip
-										value={isZero(monthlyAPR) ? weeklyAPR : monthlyAPR}
+										value={displayedAPR}
 										symbol={'percent'}
 										decimals={6}
 									/>
@@ -314,7 +327,7 @@ function VaultHistoricalAPR({currentVault}: {currentVault: TYDaemonVault}): Reac
 					shouldRender={!currentVault.apr?.type.includes('new')}
 					fallback={'NEW'}>
 					<RenderAmount
-						value={isZero(monthlyAPR) ? weeklyAPR : monthlyAPR}
+						value={displayedAPR}
 						shouldHideTooltip={hasZeroAPR}
 						symbol={'percent'}
 						decimals={6}
@@ -359,6 +372,10 @@ export function VaultStakedAmount({currentVault}: {currentVault: TYDaemonVault})
 }
 
 export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): ReactElement {
+	const {totalAssets, error: snapshotError, isLoading: snapshotLoading} = useKongVaultTotalAssets(
+		currentVault.chainID,
+		currentVault.address
+	);
 	const balanceOfWant = useBalance({chainID: currentVault.chainID, address: currentVault.token.address});
 	const balanceOfCoin = useBalance({chainID: currentVault.chainID, address: ETH_TOKEN_ADDRESS});
 	const balanceOfWrappedCoin = useBalance({
@@ -452,31 +469,40 @@ export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): Re
 						<p className={'yearn--table-data-section-item-label !font-aeonik'}>{'TVL'}</p>
 						<div className={'flex flex-col text-right'}>
 							<p className={'yearn--table-data-section-item-value'}>
-								<RenderAmount
-									value={Number(
-										toNormalizedBN(currentVault.tvl.totalAssets, currentVault.token.decimals)
-											.normalized
-									)}
-									symbol={''}
-									decimals={6}
-									options={{
-										shouldCompactValue: true,
-										maximumFractionDigits: 2,
-										minimumFractionDigits: 2
-									}}
-								/>
+								{snapshotLoading ? (
+									<span>{'Loading…'}</span>
+								) : !snapshotError &&
+								totalAssets !== undefined &&
+								Number.isFinite(currentVault.token.decimals) ? (
+									<RenderAmount
+										value={Number(toNormalizedBN(totalAssets, currentVault.token.decimals).normalized)}
+										symbol={''}
+										decimals={6}
+										options={{
+											shouldCompactValue: true,
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 2
+										}}
+									/>
+								) : (
+									<span title={'Kong snapshot or token precision is unavailable'}>{'N/A'}</span>
+								)}
 							</p>
 							<small className={'text-xs text-neutral-900/40'}>
-								<RenderAmount
-									value={currentVault.tvl?.tvl}
-									symbol={'USD'}
-									decimals={0}
-									options={{
-										shouldCompactValue: true,
-										maximumFractionDigits: 2,
-										minimumFractionDigits: 0
-									}}
-								/>
+								{Number.isFinite(currentVault.tvl?.tvl) ? (
+									<RenderAmount
+										value={currentVault.tvl.tvl}
+										symbol={'USD'}
+										decimals={0}
+										options={{
+											shouldCompactValue: true,
+											maximumFractionDigits: 2,
+											minimumFractionDigits: 0
+										}}
+									/>
+								) : (
+									<span>{'N/A'}</span>
+								)}
 							</small>
 						</div>
 					</div>

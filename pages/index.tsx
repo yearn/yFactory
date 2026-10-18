@@ -3,6 +3,7 @@ import {VAULT_FACTORY_ABI} from 'app/abi/vaultFactory.abi';
 import {createNewVaultsAndStrategies, gasOfCreateNewVaultsAndStrategies} from 'app/actions';
 import {VaultListFactory} from 'app/components/VaultListFactory';
 import {useCurve} from 'app/contexts/useCurve';
+import {useYearn} from 'app/contexts/useYearn';
 import {Dropdown} from 'app/GaugeDropdown';
 import {YFACTORY_SUPPORTED_NETWORK} from 'app/utils';
 import {useWeb3} from '@builtbymom/web3/contexts/useWeb3';
@@ -16,7 +17,6 @@ import {Button} from '@yearn-finance/web-lib/components/Button';
 import {ImageWithFallback} from '@yearn-finance/web-lib/components/ImageWithFallback';
 import {Renderable} from '@yearn-finance/web-lib/components/Renderable';
 import {toast} from '@yearn-finance/web-lib/components/yToast';
-import {useYearn} from '@yearn-finance/web-lib/contexts/useYearn';
 import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
 import {VAULT_FACTORY_ADDRESS, ZERO_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 

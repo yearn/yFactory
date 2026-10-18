@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import {useRouter} from 'next/router';
 import AppHeader from 'app/components/common/Header';
 import {CurveContextApp} from 'app/contexts/useCurve';
+import {YearnContextApp} from 'app/contexts/useYearn';
 import manifest from 'public/manifest.json';
 import {AnimatePresence, motion} from 'framer-motion';
 import {WalletContextApp} from '@builtbymom/web3/contexts/useWallet';
@@ -13,7 +14,6 @@ import {localhost} from '@builtbymom/web3/utils/wagmi/networks';
 import {Analytics} from '@vercel/analytics/react';
 import {arbitrum, base, fantom, mainnet, optimism, polygon} from '@wagmi/chains';
 import Meta from '@yearn-finance/web-lib/components/Meta';
-import {YearnContextApp} from '@yearn-finance/web-lib/contexts/useYearn';
 
 import type {AppProps} from 'next/app';
 import type {ReactElement} from 'react';
