@@ -1,6 +1,6 @@
 import {createContext, useContext, useMemo} from 'react';
 import useSWR from 'swr';
-import {toAddress, zeroAddress} from '@builtbymom/web3/utils';
+import {toAddress, ZERO_ADDRESS} from '@builtbymom/web3/utils';
 
 import type {ReactElement} from 'react';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
@@ -177,7 +177,7 @@ function vaultKey(vault: Pick<TYDaemonVault, 'chainID' | 'address'>): string {
 }
 
 function nonZeroAddress(value?: string | null): `0x${string}` | undefined {
-	if (!value || !/^0x[a-fA-F0-9]{40}$/.test(value) || value.toLowerCase() === zeroAddress.toLowerCase()) {
+	if (!value || !/^0x[a-fA-F0-9]{40}$/.test(value) || value.toLowerCase() === ZERO_ADDRESS.toLowerCase()) {
 		return undefined;
 	}
 	return toAddress(value);
@@ -227,9 +227,10 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 	const activeRewardAPRs = (stakingRewards || [])
 		.filter(reward => reward.isFinished !== true)
 		.map(reward => finiteNumber(reward.apr));
+	const validRewardAPRs = activeRewardAPRs.filter((apr): apr is number => apr !== undefined);
 	const stakingRewardsAPR =
-		stakingRewards && activeRewardAPRs.every(apr => apr !== undefined)
-			? activeRewardAPRs.reduce((total, apr) => total + (apr as number), 0)
+		stakingRewards && validRewardAPRs.length === activeRewardAPRs.length
+			? validRewardAPRs.reduce((total, apr) => total + apr, 0)
 			: Number.NaN;
 	const migration = meta?.migration;
 	const migrationAddress = nonZeroAddress(migration?.target);
@@ -311,7 +312,7 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 		boosted: meta?.isBoosted ?? vault.isBoosted ?? false,
 		strategies: [],
 		staking: {
-			address: toAddress(snapshot?.staking?.address || vault.staking?.address || zeroAddress),
+			address: toAddress(snapshot?.staking?.address || vault.staking?.address || ZERO_ADDRESS),
 			available: snapshot?.staking?.available ?? vault.staking?.available ?? false
 		},
 		migration: {
