@@ -22,14 +22,25 @@ type TKongReward = {
 };
 
 type TKongPerformance = {
-	oracle?: {apr?: number | null; apy?: number | null; netAPY?: number | null} | null;
+	oracle?: {apr?: number | string | null; apy?: number | string | null; netAPY?: number | string | null} | null;
 	estimated?: {
-		apr?: number | null;
-		apy?: number | null;
+		apr?: number | string | null;
+		apy?: number | string | null;
 		type?: string | null;
-		components?: {boost?: number | null; poolAPY?: number | null; boostedAPR?: number | null; baseAPR?: number | null; rewardsAPR?: number | null} | null;
+		components?: {
+			boost?: number | string | null;
+			poolAPY?: number | string | null;
+			boostedAPR?: number | string | null;
+			baseAPR?: number | string | null;
+			rewardsAPR?: number | string | null;
+		} | null;
 	} | null;
-	historical?: {net?: number | null; weeklyNet?: number | null; monthlyNet?: number | null; inceptionNet?: number | null} | null;
+	historical?: {
+		net?: number | string | null;
+		weeklyNet?: number | string | null;
+		monthlyNet?: number | string | null;
+		inceptionNet?: number | string | null;
+	} | null;
 };
 
 type TKongVault = {
@@ -43,7 +54,7 @@ type TKongVault = {
 	tvl?: number | string | null;
 	pricePerShare?: number | string | null;
 	performance?: TKongPerformance | null;
-	fees?: {managementFee?: number | null; performanceFee?: number | null} | null;
+	fees?: {managementFee?: number | string | null; performanceFee?: number | string | null} | null;
 	category?: string | null;
 	type?: string | null;
 	kind?: string | null;
@@ -121,6 +132,21 @@ async function fetchJson<T>(url: string): Promise<T> {
 	return (await response.json()) as T;
 }
 
+async function fetchVaultList(): Promise<TKongVault[]> {
+	const response = await fetch(KONG_LIST_URL);
+	if (!response.ok) {
+		throw new Error(`Kong vault list request failed (${response.status})`);
+	}
+	const data: unknown = await response.json();
+	if (
+		!Array.isArray(data) ||
+		!data.every(row => row && typeof row.chainId === 'number' && typeof row.address === 'string')
+	) {
+		throw new Error('Kong vault list response was malformed');
+	}
+	return data as TKongVault[];
+}
+
 const MAX_CONCURRENT_SNAPSHOTS = 8;
 let activeSnapshots = 0;
 const snapshotWaiters: Array<() => void> = [];
@@ -144,6 +170,17 @@ function snapshotKey(vault: TKongVault): string {
 
 function hasMigration(vault: TKongVault): boolean {
 	return vault.migration === true || (typeof vault.migration === 'object' && vault.migration !== null);
+}
+
+function vaultKey(vault: Pick<TYDaemonVault, 'chainID' | 'address'>): string {
+	return `${vault.chainID}-${vault.address.toLowerCase()}`;
+}
+
+function nonZeroAddress(value?: string | null): `0x${string}` | undefined {
+	if (!value || !/^0x[a-fA-F0-9]{40}$/.test(value) || value.toLowerCase() === zeroAddress.toLowerCase()) {
+		return undefined;
+	}
+	return toAddress(value);
 }
 
 function parseRawAmount(value: string | number | null | undefined): bigint | undefined {
@@ -195,17 +232,26 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 			? activeRewardAPRs.reduce((total, apr) => total + (apr as number), 0)
 			: Number.NaN;
 	const migration = meta?.migration;
+	const migrationAddress = nonZeroAddress(migration?.target);
+	const migrationContract = nonZeroAddress(migration?.contract);
+	const migrationAvailable =
+		migration?.available === true &&
+		migrationAddress !== undefined &&
+		migrationContract !== undefined;
 	const totalAssetsValue = parseRawAmount(snapshot?.totalAssets);
 	const decimalValue = finiteNumber(snapshot?.decimals ?? vault.decimals ?? asset?.decimals) ?? Number.NaN;
 	const listTVL = finiteNumber(vault.tvl);
 	const snapshotTVL = finiteNumber(snapshot?.tvl?.close);
+	const version = snapshot?.apiVersion || vault.apiVersion || '';
+	const isV3 = version.startsWith('3.');
 	const forwardAPR = finiteNumber(estimated?.apr);
+	const forwardRate = isV3 ? finiteNumber(performance?.oracle?.netAPY) : forwardAPR;
 	const managementFee = finiteNumber(vault.fees?.managementFee);
 	const performanceFee = finiteNumber(vault.fees?.performanceFee);
 
 	return {
 		address: toAddress(vault.address),
-		version: snapshot?.apiVersion || vault.apiVersion || '',
+		version,
 		type: (meta?.type || vault.type || 'Yearn Vault') as TYDaemonVault['type'],
 		kind: (meta?.kind || vault.kind || 'Legacy') as TYDaemonVault['kind'],
 		symbol: vault.symbol || '',
@@ -241,8 +287,16 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 				inception: finiteNumber(historical?.inceptionNet) ?? Number.NaN
 			},
 			forwardAPR: {
-				type: forwardAPR === undefined ? estimated?.type || 'unavailable' : estimated?.type || 'estimated',
-				netAPR: forwardAPR ?? Number.NaN,
+				type: (isV3
+					? forwardRate === undefined
+						? 'unavailable-apy'
+						: 'oracle-netAPY'
+					: !estimated
+						? ''
+						: forwardRate === undefined
+							? estimated.type || 'unavailable'
+							: estimated.type || 'estimated'),
+				netAPR: forwardRate ?? Number.NaN,
 				composite: {
 					boost: finiteNumber(estimated?.components?.boost) ?? Number.NaN,
 					poolAPY: finiteNumber(estimated?.components?.poolAPY) ?? Number.NaN,
@@ -261,9 +315,9 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 			available: snapshot?.staking?.available ?? vault.staking?.available ?? false
 		},
 		migration: {
-			available: migration?.available ?? vault.migration === true,
-			address: migration?.target ? toAddress(migration.target) : (undefined as unknown as `0x${string}`),
-			contract: migration?.contract ? toAddress(migration.contract) : (undefined as unknown as `0x${string}`)
+			available: migrationAvailable,
+			address: migrationAddress as `0x${string}`,
+			contract: migrationContract as `0x${string}`
 		},
 		info: {sourceURL: ''}
 	} as unknown as TYDaemonVault;
@@ -272,7 +326,7 @@ function mapKongVault(vault: TKongVault, snapshot?: TKongSnapshot, listError = f
 const YearnContext = createContext<TYearnContext>(defaultContext);
 
 export function YearnContextApp({children}: {children: ReactElement}): ReactElement {
-	const {data: rows, error: listError, mutate, isLoading} = useSWR<TKongVault[]>(KONG_LIST_URL, fetchJson);
+	const {data: rows, error: listError, mutate, isLoading} = useSWR<TKongVault[]>(KONG_LIST_URL, fetchVaultList);
 	const requiredSnapshotKeys = useMemo((): string[] => {
 		return (rows || [])
 			.filter(vault => hasMigration(vault) || vault.staking?.available === true)
@@ -308,14 +362,14 @@ export function YearnContextApp({children}: {children: ReactElement}): ReactElem
 		for (const row of rows || []) {
 			const vault = mapKongVault(row, snapshots.get(snapshotKey(row)), Boolean(listError));
 			if (hasMigration(row)) {
-				migrations[vault.address] = vault;
+				migrations[vaultKey(vault)] = vault;
 			}
 			if (row.isRetired) {
-				retired[vault.address] = vault;
+				retired[vaultKey(vault)] = vault;
 				continue;
 			}
 			if (!row.isHidden && !hasMigration(row)) {
-				active[vault.address] = vault;
+				active[vaultKey(vault)] = vault;
 			}
 		}
 		return {active, migrations, retired};

@@ -16,6 +16,23 @@ import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVa
 
 export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): ReactElement {
 	const isEthMainnet = currentVault.chainID === 1;
+	const isV3 = currentVault.version.startsWith('3.');
+	if (isV3) {
+		if (!Number.isFinite(currentVault.apr.forwardAPR.netAPR)) {
+			return <p className={'yearn--table-data-section-item-value'}>{'N/A'}</p>;
+		}
+		return (
+			<div className={'flex flex-col text-right'}>
+				<b className={'yearn--table-data-section-item-value'}>
+					<RenderAmount
+						value={currentVault.apr.forwardAPR.netAPR}
+						symbol={'percent'}
+						decimals={6}
+					/>
+				</b>
+			</div>
+		);
+	}
 	const displayedAPR =
 		currentVault.apr.forwardAPR.type === '' ? currentVault.apr.netAPR : currentVault.apr.forwardAPR.netAPR;
 	if (
@@ -108,7 +125,11 @@ export function VaultForwardAPR({currentVault}: {currentVault: TYDaemonVault}): 
 		);
 	}
 
-	if (isEthMainnet && currentVault.apr.forwardAPR.composite?.boost > 0 && !currentVault.apr.extra.stakingRewardsAPR) {
+	if (
+		isEthMainnet &&
+		currentVault.apr.forwardAPR.composite?.boost > 0 &&
+		!currentVault.apr.extra.stakingRewardsAPR
+	) {
 		const unBoostedAPR = currentVault.apr.forwardAPR.netAPR / currentVault.apr.forwardAPR.composite.boost;
 		return (
 			<span className={'tooltip'}>
@@ -428,7 +449,9 @@ export function VaultsListRow({currentVault}: {currentVault: TYDaemonVault}): Re
 					<div
 						className={'yearn--table-data-section-item md:col-span-2'}
 						datatype={'number'}>
-						<p className={'yearn--table-data-section-item-label !font-aeonik'}>{'Estimated APR'}</p>
+						<p className={'yearn--table-data-section-item-label !font-aeonik'}>
+							{currentVault.version.startsWith('3.') ? 'Estimated APY' : 'Estimated APR'}
+						</p>
 						<VaultForwardAPR currentVault={currentVault} />
 					</div>
 

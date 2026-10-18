@@ -93,8 +93,8 @@ export function useVaultFilter(
 		vaults,
 		(vault): boolean => vault.category === 'Curve' && isAutomatedVault(vault)
 	);
-	const migratableVaults = useFilteredVaults(vaultsMigrations, ({address, chainID}): boolean =>
-		filterMigrationCallback(address, chainID)
+	const migratableVaults = useFilteredVaults(vaultsMigrations, ({address, chainID, migration}): boolean =>
+		migration.available && filterMigrationCallback(address, chainID)
 	);
 	const retiredVaults = useFilteredVaults(vaultsRetired, ({address, chainID}): boolean =>
 		filterMigrationCallback(address, chainID)
@@ -156,7 +156,8 @@ export function useVaultFilter(
 
 		//remove duplicates
 		_vaultList = _vaultList.filter(
-			(vault, index, self): boolean => index === self.findIndex((v): boolean => v.address === vault.address)
+			(vault, index, self): boolean =>
+				index === self.findIndex((v): boolean => v.chainID === vault.chainID && v.address === vault.address)
 		);
 
 		// Remove v3 vaults
